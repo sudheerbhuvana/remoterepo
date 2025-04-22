@@ -1,330 +1,6 @@
-
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> <html> <head> <title>:: Memo Download ::::</title> <meta http-equiv="pragma" content="no-cache"> <meta http-equiv="cache-control" content="no-cache"> <meta http-equiv="expires" content="0"> <meta http-equiv="keywords" content="
-
-pasted
-
-does this  have the source they are getting data from?
-
-Edit
-Looking at the HTML document you shared, I can see it's a web page for downloading results memos for Telangana State Board of Intermediate Education (TGBIE) examination results.
-
-The data source isn't explicitly mentioned in the code, but I can see some details about where the form data is submitted:
-
-The form submits to "/bieresultliveNewChanges2025.do" as seen in this line:
-<form name="StudentResultForm" method="post" action="/bieresultliveNewChanges2025.do">
-Based on various JavaScript functions in the code (like getStudentResult()), it appears the system accesses different database endpoints depending on the year and category selected. The form uses an "actionpart" hidden field that gets set to different values like:
-getBieResultFirstYearGen
-getBieResultFirstYearVoc
-getBieResultSecondYearGen
-etc.
-These endpoints likely connect to the Telangana State Board of Intermediate Education's database system, though the actual database details aren't visible in the frontend code.
-
-The page appears to be designed and developed by the "Centre for Good Governance" as mentioned in the footer.
-
-
-
-
-
-i wnt to get same data as that website
-
-Edit
-I understand you want to obtain the same data that's accessible through this website (the Telangana State Board of Intermediate Education results system).
-
-To get this data, you have a few options:
-
-Use the official website: The most straightforward and legitimate way is to use the website as intended. Based on the form you shared, you would need:
-A valid 10-digit hall ticket number
-Select the appropriate year (First or Second)
-Choose the category (General, Vocational, General Bridge Course, or Vocational Bridge Course)
-The website is for 2025 results specifically
-Official API: Check if TGBIE offers an official API for accessing results. Some educational boards provide APIs for legitimate third-party applications.
-Web scraping: If you need to collect this data programmatically and there's no official API, you could create a web scraper. However, be aware that:
-Web scraping may violate the website's terms of service
-The website has multiple security measures (like disabling right-click, preventing back navigation)
-You would need to handle form submissions and parse the returned results
-If you're considering web scraping, I recommend first checking if there are legitimate ways to access this data through official channels, as educational records are sensitive information.
-
-What specifically are you hoping to do with this data? This would help me provide more tailored advice on the best approach.
-
-
-
-
-image.png
-someone is already dong and this is his some part of terminal
-
-Edit
-I see that someone has already been accessing the Telangana results data. The image shows HTTP requests to two main endpoints:
-
-/tg_res/fetch-result.php - Likely for first year results
-/tg_res/fetch-result._2nd.php - Likely for second year results
-These are different from the path shown in the HTML you shared earlier (/bieresultliveNewChanges2025.do), which suggests they've found the actual API endpoints that directly fetch the results.
-
-The log shows a pattern of alternating POST and OPTIONS requests, which is typical for web requests that may involve CORS (Cross-Origin Resource Sharing). The OPTIONS requests are preflight checks before the actual POST requests that fetch the data.
-
-If you want to replicate this approach, you would need:
-
-The correct endpoint URLs (which you now have)
-The proper POST parameters to send (hall ticket number, year, category, etc.)
-Any required headers or authentication tokens
-A Python script using the requests library could be used to make these POST requests. For example:
-
-python
-import requests
-
-# For first year results
-url = "https://example.com/tg_res/fetch-result.php"
-# For second year results 
-# url = "https://example.com/tg_res/fetch-result._2nd.php"
-
-data = {
-    "hallticket_no": "1234567890",  # 10-digit hall ticket number
-    "year": "1",  # 1 for first year, 2 for second year
-    "category": "G",  # G for General, V for Vocational, etc.
-    "pass_year": "2025"
-}
-
-response = requests.post(url, data=data)
-if response.status_code == 200:
-    print(response.text)  # This would contain the result data
-else:
-    print(f"Error: {response.status_code}")
-Just remember that accessing this data outside the official channels could potentially violate terms of service or potentially raise privacy concerns if you're accessing others' educational records. Be sure you have proper authorization before proceeding.
-
-
-
-
-
-import requests
-from bs4 import BeautifulSoup
-
-# Set the URL where the form posts data
-url = 'http://results.cgg.gov.in//bieresultliveNewChanges2025.do'  # Replace <domain> with the actual domain
-
-# Set the form data for the first-year regular student
-form_data = {
-    'actionpart': 'getBieResultFirstYearReg',  # Action for first-year regular student
-    'property(pass_year)': '2025',  # Assuming the exam is for the year 2025
-    'year': '1',  # Year of study is 1st year
-    'category': 'R',  # Category for regular students
-    'hallticket_no': '2561116713',  # The student ID you provided
-}
-
-# Send the POST request
-response = requests.post(url, data=form_data)
-
-# Check if the response was successful
-if response.status_code == 200:
-    # Parse the response with BeautifulSoup
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    # Print the raw HTML to check the structure of the result
-    # You can comment this line out once you identify the correct result selector
-    print(soup.prettify())
-
-    # Example: Find the result (adjust this based on actual HTML structure)
-    # You need to inspect the response and find the actual result location
-    result = soup.find('div', class_='result')  # Adjust based on actual structure
-
-    if result:
-        print("Student Result:", result.text.strip())
-    else:
-        print("Result not found.")
-else:
-    print(f"Failed to retrieve the result. Status code: {response.status_code}")
-
-i already have this. make ur changes in this
-
-Edit
-Looking at your code, it's trying to access the results from the official results page using a POST request. Let's make some changes based on the HTTP log you shared, which suggests a different endpoint structure might be in use.
-
-Here's the modified code that uses the endpoint shown in your terminal screenshot:
-
-python
-import requests
-from bs4 import BeautifulSoup
-
-# Set the URL to the endpoint seen in the terminal logs
-url = 'http://results.cgg.gov.in/tg_res/fetch-result.php'  # First year endpoint
-
-# Set the form data based on what we know
-form_data = {
-    'hallticket_no': '2561116713',  # The student ID you provided
-    'year': '1',  # 1 for first year
-    'category': 'G',  # G for General (changed from 'R' which was for Regular)
-    'pass_year': '2025'  # Exam year
-}
-
-# Add headers to mimic a browser request
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Origin': 'http://results.cgg.gov.in',
-    'Referer': 'http://results.cgg.gov.in/results.html'
-}
-
-# Send the POST request
-try:
-    response = requests.post(url, data=form_data, headers=headers)
-    
-    # Check if the response was successful
-    if response.status_code == 200:
-        # Try to parse as JSON first (common for API responses)
-        try:
-            result_data = response.json()
-            print("Result Data (JSON):", result_data)
-        except:
-            # If not JSON, parse with BeautifulSoup
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Save the full HTML response to a file for inspection
-            with open('result_response.html', 'w', encoding='utf-8') as f:
-                f.write(soup.prettify())
-            
-            print("Raw response saved to 'result_response.html'")
-            
-            # Try to find common result elements
-            # This is a guess - you'll need to adjust based on actual HTML structure
-            result_table = soup.find('table', class_='marks_table_styles')
-            if result_table:
-                print("Found results table:")
-                for row in result_table.find_all('tr'):
-                    print(' | '.join([cell.text.strip() for cell in row.find_all(['td', 'th'])]))
-            else:
-                # Look for any result indicators
-                result_div = soup.find(['div', 'section'], id=['result', 'studentResult', 'marks'])
-                if result_div:
-                    print("Result Information:", result_div.text.strip())
-                else:
-                    print("No specific result elements found. Check the saved HTML file.")
-    else:
-        print(f"Failed to retrieve the result. Status code: {response.status_code}")
-        print("Response text:", response.text)
-
-except Exception as e:
-    print(f"An error occurred: {str(e)}")
-Changes made:
-
-Updated the URL to match the one shown in your terminal screenshot (/tg_res/fetch-result.php)
-Changed category from 'R' to 'G' as the form in the HTML used 'G' for General
-Added headers to make the request appear more like it's coming from a browser
-Enhanced error handling and response processing:
-Try to parse as JSON first (APIs often return JSON)
-Save the raw HTML to a file for inspection
-Try multiple approaches to extract result data
-Provide more detailed error output
-This code should give you a better starting point. You might need to:
-
-Adjust the URL if the domain is different
-Fine-tune the form parameters based on the actual requirements
-Modify the HTML parsing once you see the actual structure of the response
-If this doesn't work, examining the saved HTML file will help you understand what data is being returned and how to extract it.
-
-
-
-
-
-PS C:\Sudheer\Py Playground> py index.py
-An error occurred: HTTPConnectionPool(host='results.cgg.gov.in', port=80): Max retries exceeded with url: /tg_res/fetch-result.php (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x0000021894052120>, 'Connection to results.cgg.gov.in timed out. (connect timeout=None)'))
-PS C:\Sudheer\Py Playground>
-
-Edit
-It looks like you're experiencing a connection timeout when trying to reach the server. This could be due to several reasons:
-
-The server might be blocking requests that don't come from the official website
-The URL could be incorrect or accessible only within certain networks
-The server might be down or experiencing high traffic
-Let's try a different approach:
-
-python
-import requests
-from bs4 import BeautifulSoup
-import time
-
-# We'll try both the URL paths we've seen
-urls = [
-    'http://results.cgg.gov.in/bieresultliveNewChanges2025.do',  # Original URL from your code
-    'http://results.cgg.gov.in/tg_res/fetch-result.php',         # URL from terminal screenshot
-    'https://results.cgg.gov.in/bieresultliveNewChanges2025.do', # HTTPS version
-    'https://results.cgg.gov.in/tg_res/fetch-result.php'         # HTTPS version
-]
-
-form_data = {
-    'actionpart': 'getBieResultFirstYearGen',  # Changed to match the form's JavaScript
-    'property(pass_year)': '2025',
-    'year': '1', 
-    'category': 'G',
-    'property(month)': '3',  # From the form, this is for IPE exams
-    'hallticket_no': '2561116713'
-}
-
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-}
-
-# Try each URL with a short timeout
-for url in urls:
-    try:
-        print(f"Trying URL: {url}")
-        response = requests.post(url, data=form_data, headers=headers, timeout=10)
-        
-        print(f"Status code: {response.status_code}")
-        if response.status_code == 200:
-            # Save the response content to a file for inspection
-            with open('result_response.html', 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            
-            print(f"Success! Response saved to 'result_response.html'")
-            break  # Exit the loop if successful
-    except Exception as e:
-        print(f"Error with {url}: {str(e)}")
-    
-    print("Waiting 2 seconds before trying next URL...")
-    time.sleep(2)
-This script:
-
-Tries multiple URL variations
-Sets a 10-second timeout to avoid hanging
-Uses the exact form parameters from the HTML form
-Saves any successful response to a file
-If all these URLs fail, there might be additional considerations:
-
-The server might require specific cookies or session information
-The site might use JavaScript to generate or modify form data before submission
-There could be IP-based restrictions or rate limiting
-In these cases, you might need to:
-
-First visit the main page to get cookies
-Use a tool like Selenium that can execute JavaScript
-Look more closely at how the form is submitted in the actual website
-
-
-
-
-
-check this out
-
-
-<html lang="EN-IN" class="no-js"><head><meta charset="utf-8"><meta name="google-site-verification" content="UJ0Grhv9torX-u90bqOTwW3jrBhNlXalD1Ruc_WtFPM"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="index, follow"><meta name="googlebot" content="i
-
-pasted
-
-
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> <html> <head> <title>:: Memo Download ::::</title> <meta http-equiv="pragma" content="no-cache"> <meta http-equiv="cache-control" content="no-cache"> <meta http-equiv="expires" content="0"> <meta http-equiv="keywords" content="
-
-
-
-Pasted content
-
-61.86 KB •804 lines
-•
-Formatting may be inconsistent from source
-
-<html lang="EN-IN" class="no-js"><head><meta charset="utf-8"><meta name="google-site-verification" content="UJ0Grhv9torX-u90bqOTwW3jrBhNlXalD1Ruc_WtFPM"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="index, follow"><meta name="googlebot" content="index,follow"><meta name="googlebot-news" content="index, follow"><title>Telangana Inter 1st Year Result 2025 | TG Inter Results 2025 | TS Inter Results | తెలంగాణ ఇంటర్ ఫలితాలు 2025 - Eenadu</title><meta name="keywords" content="tg inter results 2025, inter results 2025, tg inter results 2025 telugu,ts inter results 2025 link download, ts inter results 2025, inter results 2025, ts inter results 2025 telugu, ts inter results date, tsbie results, inter 1st year results, ts inter 1st year results, ts inter results 2025 1st year, ts inter results 2025 tsbie, tsbie results 2025, inter results 2025 date telangana, when ts inter results 2025, when inter results 2025 ts, ts inter results 2025, india results ts inter 2025 1st year, ts inter results, ts intermediate 1st year results 2025, tg intermediate 1st year results 2025"><meta name="description" content="Telangana Inter 1st Year Result 2025 - As per official notification of Telangana Intermediate Board, Intermediate 1st year results will be released soon. Check your Inter 1st year result by entering your hall ticket number on the website results.eenadu.net"><meta name="news_keywords" content="tg inter results 2025, inter results 2025, tg inter results 2025 telugu,ts inter results 2025 link download, ts inter results 2025, inter results 2025, ts inter results 2025 telugu, ts inter results date, tsbie results, inter 1st year results, ts inter 1st year results, ts inter results 2025 1st year, ts inter results 2025 tsbie, tsbie results 2025, inter results 2025 date telangana, when ts inter results 2025, when inter results 2025 ts, ts inter results 2025, india results ts inter 2025 1st year, ts inter results, ts intermediate 1st year results 2025, tg intermediate 1st year results 2025"><meta name="abstract" content="Telangana Inter 1st Year Result 2025 - As per official notification of Telangana Intermediate Board, Intermediate 1st year results will be released soon. Check your Inter 1st year result by entering your hall ticket number on the website results.eenadu.net"><meta name="HandheldFriendly" content="true"><meta name="apple-touch-fullscreen" content="YES"><meta property="fb:app_id" content="2296212830610113"><meta property="fb:pages" content="282370161903806"><meta property="og:url" content="https://results.eenadu.net/tg-inter-2025/tg-inter-1st-year-results-general.aspx"><meta property="og:site_name" content="EENADU"><meta property="og:title" itemprop="name" content="తెలంగాణ ఇంటర్&zwnj; ప్రథమ సంవత్సరం ఫలితాలు"><meta property="og:description" itemprop="description" content="Telangana Intermediate 1st Year Result 2025"><meta property="og:image" itemprop="image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta property="og:image:url" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta property="og:image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta property="og:type" content="website"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="680"><meta property="og:image:height" content="310"><meta property="og:imageWidth" content="680"><meta property="og:imageHeight" content="310"><link itemprop="image" href="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@eenaduresults"><meta name="twitter:creator" content="@Eenadu.NET"><meta name="twitter:title" content="తెలంగాణ ఇంటర్&zwnj; ప్రథమ సంవత్సరం ఫలితాలు"><meta name="twitter:description" content="Telangana Intermediate 1st Year Result 2025"><meta name="twitter:image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta itemprop="image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta itemprop="author" content="EENADU"><meta itemprop="publisher" content="EENADU"><meta itemprop="headline" content="తెలంగాణ ఇంటర్&zwnj; ప్రథమ సంవత్సరం ఫలితాలు"><link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"><link href="../css/reslt.css?v=16042025" rel="stylesheet" type="text/css"><link href="../css/reslt-new.css?v=16042025" rel="stylesheet" type="text/css"><link href="../css/header.css?v=16042025" rel="stylesheet" type="text/css"><link href="../UniFont/eenadu-webfont.css?v=16042025" rel="stylesheet" type="text/css">
+<html lang="EN-IN" class="no-js"><head><meta charset="utf-8"><meta name="google-site-verification" content="UJ0Grhv9torX-u90bqOTwW3jrBhNlXalD1Ruc_WtFPM"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="index, follow"><meta name="googlebot" content="index,follow"><meta name="googlebot-news" content="index, follow"><title>
+	Telangana Inter 1st Year Result 2025 | TG Inter Results 2025 | TS Inter Results | తెలంగాణ ఇంటర్ ఫలితాలు 2025 - Eenadu
+</title><meta name="keywords" content="tg inter results 2025, inter results 2025, tg inter results 2025 telugu,ts inter results 2025 link download, ts inter results 2025, inter results 2025, ts inter results 2025 telugu, ts inter results date, tsbie results, inter 1st year results, ts inter 1st year results, ts inter results 2025 1st year, ts inter results 2025 tsbie, tsbie results 2025, inter results 2025 date telangana, when ts inter results 2025, when inter results 2025 ts, ts inter results 2025, india results ts inter 2025 1st year, ts inter results, ts intermediate 1st year results 2025, tg intermediate 1st year results 2025"><meta name="description" content="Telangana Inter 1st Year Result 2025 - As per official notification of Telangana Intermediate Board, Intermediate 1st year results will be released soon. Check your Inter 1st year result by entering your hall ticket number on the website results.eenadu.net"><meta name="news_keywords" content="tg inter results 2025, inter results 2025, tg inter results 2025 telugu,ts inter results 2025 link download, ts inter results 2025, inter results 2025, ts inter results 2025 telugu, ts inter results date, tsbie results, inter 1st year results, ts inter 1st year results, ts inter results 2025 1st year, ts inter results 2025 tsbie, tsbie results 2025, inter results 2025 date telangana, when ts inter results 2025, when inter results 2025 ts, ts inter results 2025, india results ts inter 2025 1st year, ts inter results, ts intermediate 1st year results 2025, tg intermediate 1st year results 2025"><meta name="abstract" content="Telangana Inter 1st Year Result 2025 - As per official notification of Telangana Intermediate Board, Intermediate 1st year results will be released soon. Check your Inter 1st year result by entering your hall ticket number on the website results.eenadu.net"><meta name="HandheldFriendly" content="true"><meta name="apple-touch-fullscreen" content="YES"><meta property="fb:app_id" content="2296212830610113"><meta property="fb:pages" content="282370161903806"><meta property="og:url" content="https://results.eenadu.net/tg-inter-2025/tg-inter-1st-year-results-general.aspx"><meta property="og:site_name" content="EENADU"><meta property="og:title" itemprop="name" content="తెలంగాణ ఇంటర్&zwnj; ప్రథమ సంవత్సరం ఫలితాలు"><meta property="og:description" itemprop="description" content="Telangana Intermediate 1st Year Result 2025"><meta property="og:image" itemprop="image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta property="og:image:url" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta property="og:image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta property="og:type" content="website"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="680"><meta property="og:image:height" content="310"><meta property="og:imageWidth" content="680"><meta property="og:imageHeight" content="310"><link itemprop="image" href="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@eenaduresults"><meta name="twitter:creator" content="@Eenadu.NET"><meta name="twitter:title" content="తెలంగాణ ఇంటర్&zwnj; ప్రథమ సంవత్సరం ఫలితాలు"><meta name="twitter:description" content="Telangana Intermediate 1st Year Result 2025"><meta name="twitter:image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta itemprop="image" content="https://results.eenadu.net/tg-inter-2025/images/tg-inter.webp"><meta itemprop="author" content="EENADU"><meta itemprop="publisher" content="EENADU"><meta itemprop="headline" content="తెలంగాణ ఇంటర్&zwnj; ప్రథమ సంవత్సరం ఫలితాలు"><link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"><link href="../css/reslt.css?v=16042025" rel="stylesheet" type="text/css"><link href="../css/reslt-new.css?v=16042025" rel="stylesheet" type="text/css"><link href="../css/header.css?v=16042025" rel="stylesheet" type="text/css"><link href="../UniFont/eenadu-webfont.css?v=16042025" rel="stylesheet" type="text/css">
     <script async="" src="https://sb.scorecardresearch.com/cs/20416623/beacon.js"></script><script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-NLSKVH9D"></script><script src="../js/jquery.min.js"></script>
    
  
@@ -595,7 +271,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div><!--nav-top-->
     </div><!--header-->
 
-    <div class="fs-header-2 hedstick" id="nav-bottom">
+    <div class="fs-header-2" id="nav-bottom">
         <div class="fs-nav">
             <a href="https://results.eenadu.net/">హోం</a>
             <a href="https://www.eenadu.net/">ఈనాడు హోం</a>
@@ -624,10 +300,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- 3 column Section Start -->
          <form method="post" action="./tg-inter-1st-year-results-general.aspx" onsubmit="javascript:return WebForm_OnSubmit();" id="form1">
 <div class="aspNetHidden">
-
-
-
-
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTUyNTM2ODAzMA9kFgICCA8PFgIeBFRleHQFOOCwruCwguCwl+Cws+CwteCwvuCwsOCwgiwg4LCP4LCq4LGN4LCw4LC/4LCy4LGNIDIyLCAyMDI1ZGRkjsVafVPB66XLTYiK/OzntISnlok=">
 </div>
 
 <script type="text/javascript">
@@ -665,10 +341,10 @@ return true;
 
 <div class="aspNetHidden">
 
-	
-	
-	
-	
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="5338D94C">
+	<input type="hidden" name="__SCROLLPOSITIONX" id="__SCROLLPOSITIONX" value="0">
+	<input type="hidden" name="__SCROLLPOSITIONY" id="__SCROLLPOSITIONY" value="0">
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAANwA5o+4wStvl9bB3eFoZYD25mTIbcP91/GqB57z2Eq3BsRKej6wdX4jURfxOzOxSCIpBzOnjPQ/01pDIrvhtEeIo5A3g==">
 </div>
         <section class="3col">
             <!-- include file = ads/1st-Year/d_left_160x160.htm -->
@@ -709,6 +385,7 @@ Sys.WebForms.PageRequestManager._initialize('ScriptManager1', 'form1', ['tUpdate
 </script>
 
            <div id="UpdatePanel1">
+	
                         <div class="resultscnt">
 
                             <!-- SOCILA SHARE ICON START -->
@@ -857,22 +534,22 @@ Sys.WebForms.PageRequestManager._initialize('ScriptManager1', 'form1', ['tUpdate
                                     <div class="row">
                                         <p>Hall Ticket No</p>
                                         <div class="stly1"><span>
-                                            <span id="lblHTNo">2561116713</span></span></div>
+                                            <span id="lblHTNo"></span></span></div>
                                     </div>
                                     <div class="row no-space-r">
                                         <p>Total</p>
                                         <div class="stly2"><span>
-                                            <span id="lblTotal">465</span></span></div>
+                                            <span id="lblTotal"></span></span></div>
                                     </div>
                                     <div class="row">
                                         <p>Name</p>
                                         <div class="stly1"><span>
-                                            <span id="lblName">CHEEDELLA LAKSHMI NAVYA MANASW</span></span></div>
+                                            <span id="lblName"></span></span></div>
                                     </div>
                                     <div class="row no-space-r">
                                         <p>Result / Grade</p>
                                         <div class="stly2"><span>
-                                            <span id="lblResultGrade">A     </span></span></div>
+                                            <span id="lblResultGrade"></span></span></div>
                                     </div>
                                     <div class="clearfix"></div>
                                     <!-- First Yr Start -->
@@ -880,36 +557,36 @@ Sys.WebForms.PageRequestManager._initialize('ScriptManager1', 'form1', ['tUpdate
                                         <div class="subject1">
                                             <div class="ftitle">Subject</div>
                                             <div class="frow">
-                                                <span id="lblSubName1"> ENGLISH</span></div>
+                                                <span id="lblSubName1"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubName2"> SANSKRIT</span></div>
+                                                <span id="lblSubName2"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubName3">MATHEMATICS  IA</span></div>
+                                                <span id="lblSubName3"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubName4">MATHEMATICS  IB</span></div>
+                                                <span id="lblSubName4"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubName5">PHYSICS</span></div>
+                                                <span id="lblSubName5"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubName6">CHEMISTRY</span></div>
+                                                <span id="lblSubName6"></span></div>
                                               <div class="frow">
-                                                <span id="lblSubName7"> ENGLISH PRACTICALS</span></div>
+                                                <span id="lblSubName7"></span></div>
                                         </div>
                                         <div class="marks1">
                                             <div class="ftitle">Marks</div>
                                             <div class="frow">
-                                                <span id="lblSubMarks1"> 76 P</span></div>
+                                                <span id="lblSubMarks1"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubMarks2"> 99 P</span></div>
+                                                <span id="lblSubMarks2"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubMarks3"> 75 P</span></div>
+                                                <span id="lblSubMarks3"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubMarks4"> 75 P</span></div>
+                                                <span id="lblSubMarks4"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubMarks5"> 60 P</span></div>
+                                                <span id="lblSubMarks5"></span></div>
                                             <div class="frow">
-                                                <span id="lblSubMarks6"> 60 P</span></div>
+                                                <span id="lblSubMarks6"></span></div>
                                               <div class="frow">
-                                                <span id="lblSubMarks7"> 20 P</span></div>
+                                                <span id="lblSubMarks7"></span></div>
                                         </div>
                                         <div class="clearfix"></div>
                                     </div>
@@ -981,7 +658,8 @@ Sys.WebForms.PageRequestManager._initialize('ScriptManager1', 'form1', ['tUpdate
                              <br>
                              <!-- include file = ads/ep-links.htm -->
                         </div>
-                   </div>
+                   
+</div>
                   
             
             <!-- Result Section End -->
@@ -1056,7 +734,7 @@ document.getElementById('vrfValidator').dispose = function() {
 }
 //]]>
 </script>
-<span style="display: none !important;"><input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value=""></span><span style="display: none !important;"><input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value=""></span><span style="display: none !important;"><input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value=""></span><span style="display: none !important;"><input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTUyNTM2ODAzMA9kFgQCCA8PFgIeBFRleHQFOOCwruCwguCwl+Cws+CwteCwvuCwsOCwgiwg4LCP4LCq4LGN4LCw4LC/4LCy4LGNIDIyLCAyMDI1ZGQCDQ9kFgICBQ9kFgJmD2QWJgIJD2QWAgIHDw8WAh8AZWRkAgsPDxYCHwAFCjI1NjExMTY3MTNkZAINDw8WAh8ABQM0NjVkZAIPDw8WAh8ABR5DSEVFREVMTEEgTEFLU0hNSSBOQVZZQSBNQU5BU1dkZAIRDw8WAh8ABQZBICAgICBkZAITDw8WAh8ABQggRU5HTElTSGRkAhUPDxYCHwAFCSBTQU5TS1JJVGRkAhcPDxYCHwAFD01BVEhFTUFUSUNTICBJQWRkAhkPDxYCHwAFD01BVEhFTUFUSUNTICBJQmRkAhsPDxYCHwAFB1BIWVNJQ1NkZAIdDw8WAh8ABQlDSEVNSVNUUllkZAIfDw8WAh8ABRMgRU5HTElTSCBQUkFDVElDQUxTZGQCIQ8PFgIfAAUFIDc2IFBkZAIjDw8WAh8ABQUgOTkgUGRkAiUPDxYCHwAFBSA3NSBQZGQCJw8PFgIfAAUFIDc1IFBkZAIpDw8WAh8ABQUgNjAgUGRkAisPDxYCHwAFBSA2MCBQZGQCLQ8PFgIfAAUFIDIwIFBkZGSVB4zug1qEMqraLYAYEAY0SkrV3Q=="></span><span style="display: none !important;"><input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="5338D94C"></span><span style="display: none !important;"><input type="hidden" name="__SCROLLPOSITIONX" id="__SCROLLPOSITIONX" value="0"></span><span style="display: none !important;"><input type="hidden" name="__SCROLLPOSITIONY" id="__SCROLLPOSITIONY" value="0"></span><span style="display: none !important;"><input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAOcuIwXQbJ+TXXO2/b9br1R25mTIbcP91/GqB57z2Eq3BsRKej6wdX4jURfxOzOxSBewUOl2CrwjbADMlH4rjm4tQ6T9g=="></span></form>
+</form>
         <!-- 3 column Section End -->
                     
         <!-- 728x90 ad start -->
@@ -1128,6 +806,3 @@ document.getElementById('vrfValidator').dispose = function() {
                         display: block !important;
                     }
                 </style><div id="kins_root" style="color-scheme: initial; forced-color-adjust: initial; mask: initial; math-depth: initial; position: initial; position-anchor: initial; text-size-adjust: initial; appearance: initial; color: initial; direction: ltr; font-family: Rubik, sans-serif; font-feature-settings: initial; font-kerning: initial; font-optical-sizing: initial; font-palette: initial; font-size: medium; font-size-adjust: initial; font-stretch: initial; font-style: initial; font-synthesis: initial; font-variant: initial; font-variation-settings: initial; font-weight: initial; position-area: initial; text-orientation: initial; text-rendering: initial; text-spacing-trim: initial; -webkit-font-smoothing: initial; -webkit-locale: initial; -webkit-text-orientation: initial; -webkit-writing-mode: initial; writing-mode: initial; zoom: initial; accent-color: initial; place-content: initial; place-items: initial; place-self: initial; alignment-baseline: initial; anchor-name: initial; anchor-scope: initial; animation-composition: initial; animation: initial; app-region: initial; aspect-ratio: initial; backdrop-filter: initial; backface-visibility: initial; background: none; background-blend-mode: initial; baseline-shift: initial; baseline-source: initial; block-size: initial; border-block: initial; border: none; border-radius: initial; border-collapse: initial; border-end-end-radius: initial; border-end-start-radius: initial; border-inline: initial; border-start-end-radius: initial; border-start-start-radius: initial; inset: initial; box-decoration-break: initial; box-shadow: initial; box-sizing: border-box; break-after: initial; break-before: initial; break-inside: initial; buffered-rendering: initial; caption-side: initial; caret-color: initial; clear: initial; clip: initial; clip-path: initial; clip-rule: initial; color-interpolation: initial; color-interpolation-filters: initial; color-rendering: initial; columns: initial; column-fill: initial; gap: initial; column-rule: initial; column-span: initial; contain: initial; contain-intrinsic-block-size: initial; contain-intrinsic-size: initial; contain-intrinsic-inline-size: initial; container: initial; content: initial; content-visibility: initial; counter-increment: initial; counter-reset: initial; counter-set: initial; cursor: initial; cx: initial; cy: initial; d: initial; display: block; dominant-baseline: initial; empty-cells: initial; field-sizing: initial; fill: initial; fill-opacity: initial; fill-rule: initial; filter: initial; flex: initial; flex-flow: initial; float: initial; flood-color: initial; flood-opacity: initial; grid: initial; grid-area: initial; height: auto; hyphenate-character: initial; hyphenate-limit-chars: initial; hyphens: initial; image-orientation: initial; image-rendering: initial; initial-letter: initial; inline-size: initial; inset-block: initial; inset-inline: initial; interpolate-size: initial; isolation: initial; letter-spacing: initial; lighting-color: initial; line-break: initial; line-height: normal; list-style: initial; margin-block: initial; margin: 0px; margin-inline: initial; marker: initial; mask-type: initial; math-shift: initial; math-style: initial; max-block-size: initial; max-height: initial; max-inline-size: initial; max-width: initial; min-block-size: initial; min-height: initial; min-inline-size: initial; min-width: initial; mix-blend-mode: initial; object-fit: initial; object-position: initial; object-view-box: initial; offset: initial; opacity: initial; order: initial; orphans: initial; outline: initial; outline-offset: initial; overflow-anchor: initial; overflow-block: initial; overflow-clip-margin: initial; overflow-inline: initial; overflow-wrap: initial; overflow: initial; overlay: initial; overscroll-behavior-block: none; overscroll-behavior-inline: none; overscroll-behavior: none; padding-block: initial; padding: 0px; padding-inline: initial; page: initial; page-orientation: initial; paint-order: initial; perspective: initial; perspective-origin: initial; pointer-events: initial; position-try: initial; position-visibility: initial; quotes: initial; r: initial; resize: initial; rotate: initial; ruby-align: initial; ruby-position: initial; rx: initial; ry: initial; scale: initial; scroll-behavior: initial; scroll-initial-target: initial; scroll-margin-block: initial; scroll-margin: initial; scroll-margin-inline: initial; scroll-marker-group: initial; scroll-padding-block: initial; scroll-padding: initial; scroll-padding-inline: initial; scroll-snap-align: initial; scroll-snap-stop: initial; scroll-snap-type: initial; scroll-timeline: initial; scrollbar-color: initial; scrollbar-gutter: initial; scrollbar-width: initial; shape-image-threshold: initial; shape-margin: initial; shape-outside: initial; shape-rendering: initial; size: initial; speak: initial; stop-color: initial; stop-opacity: initial; stroke: initial; stroke-dasharray: initial; stroke-dashoffset: initial; stroke-linecap: initial; stroke-linejoin: initial; stroke-miterlimit: initial; stroke-opacity: initial; stroke-width: initial; tab-size: initial; table-layout: initial; text-align: left; text-align-last: initial; text-anchor: initial; text-box: initial; text-combine-upright: initial; text-decoration: none; text-decoration-skip-ink: initial; text-emphasis: initial; text-emphasis-position: initial; text-indent: initial; text-overflow: initial; text-shadow: initial; text-transform: initial; text-underline-offset: initial; text-underline-position: initial; text-wrap: wrap; timeline-scope: initial; touch-action: initial; transform: initial; transform-box: initial; transform-origin: initial; transform-style: initial; transition: initial; translate: initial; user-select: initial; vector-effect: initial; vertical-align: initial; view-timeline: initial; view-transition-class: initial; view-transition-name: initial; visibility: initial; border-spacing: initial; -webkit-box-align: initial; -webkit-box-decoration-break: initial; -webkit-box-direction: initial; -webkit-box-flex: initial; -webkit-box-ordinal-group: initial; -webkit-box-orient: initial; -webkit-box-pack: initial; -webkit-box-reflect: initial; -webkit-line-break: initial; -webkit-line-clamp: initial; -webkit-mask-box-image: initial; -webkit-print-color-adjust: initial; -webkit-rtl-ordering: initial; -webkit-ruby-position: initial; -webkit-tap-highlight-color: initial; -webkit-text-combine: initial; -webkit-text-decorations-in-effect: initial; -webkit-text-fill-color: initial; -webkit-text-security: initial; -webkit-text-stroke: initial; -webkit-user-drag: initial; white-space-collapse: collapse; widows: initial; width: auto; will-change: initial; word-break: initial; word-spacing: initial; x: initial; y: initial; z-index: initial;"></div></div></body></html>
-
-
-check this out and see how are they fecting data and i now want to fetech using scrapper. please give me code
